@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="hero">
+    <h1>Welcome to WeBook</h1>
+    <p>Your personalized manga and novel recommendation community</p>
+    <div class="hero-actions">
+        {% if not current_user.is_authenticated %}
+            <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Get Started</a>
+            <a href="{{ url_for('auth.login') }}" class="btn btn-secondary">Sign In</a>
+        {% else %}
+            <a href="{{ url_for('recommendations.get_recommendations') }}" class="btn btn-primary">Discover Books</a>
+        {% endif %}
+    </div>
+</div>
+
+<section class="features">
+    <h2>Features</h2>
+    <div class="feature-grid">
+        <div class="feature">
+            <h3>🤖 Smart Recommendations</h3>
+            <p>AI-powered hybrid filtering system analyzes your reading habits to suggest perfect books</p>
+        </div>
+        <div class="feature">
+            <h3>📚 Vast Library</h3>
+            <p>Access to Google Books and Open Library APIs with thousands of manga and novels</p>
+        </div>
+        <div class="feature">
+            <h3>⭐ Reviews & Ratings</h3>
+            <p>Share your thoughts and help others discover great books</p>
+        </div>
+        <div class="feature">
+            <h3>💬 Community Chat</h3>
+            <p>Real-time chat rooms to discuss your favorite books with fellow readers</p>
+        </div>
+        <div class="feature">
+            <h3>📖 Forum</h3>
+            <p>Engage in detailed discussions about manga and novels</p>
+        </div>
+        <div class="feature">
+            <h3>🔖 Bookmarks</h3>
+            <p>Save your favorite books and keep track of your reading list</p>
+        </div>
+    </div>
+</section>
+
+<section class="categories">
+    <h2>Browse by Category</h2>
+    <div class="category-grid">
+        <a href="{{ url_for('books.list_books', is_manga='true') }}" class="category-card">
+            <h3>📕 Manga</h3>
+            <p>Explore Japanese comics and graphic novels</p>
+        </a>
+        <a href="{{ url_for('books.list_books', is_novel='true') }}" class="category-card">
+            <h3>📘 Novels</h3>
+            <p>Discover captivating stories and literature</p>
+        </a>
+    </div>
+</section>
+{% endblock %}

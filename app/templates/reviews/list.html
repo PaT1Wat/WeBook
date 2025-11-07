@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Reviews for {{ book.title }} - WeBook{% endblock %}
+
+{% block content %}
+<div class="reviews-container">
+    <h1>Reviews for "{{ book.title }}"</h1>
+    <a href="{{ url_for('books.book_detail', book_id=book.id) }}" class="btn btn-secondary">Back to Book</a>
+    
+    {% if current_user.is_authenticated %}
+        <a href="{{ url_for('reviews.create_review', book_id=book.id) }}" class="btn btn-primary">Write Review</a>
+    {% endif %}
+    
+    {% if reviews %}
+        <div class="reviews-list">
+            {% for review in reviews %}
+            <div class="review-item">
+                <div class="review-header">
+                    <h3>{{ review.title if review.title else 'Review by ' + review.user.username }}</h3>
+                    <p class="review-meta">
+                        by {{ review.user.username }} • 
+                        {{ review.created_at.strftime('%Y-%m-%d %H:%M') }}
+                    </p>
+                </div>
+                <div class="review-content">
+                    <p>{{ review.content }}</p>
+                </div>
+                <div class="review-actions">
+                    <span>❤️ {{ review.likes_count }} likes</span>
+                    {% if current_user.is_authenticated and (current_user.id == review.user_id or current_user.is_admin) %}
+                        <button onclick="deleteReview({{ review.id }})" class="btn btn-small">Delete</button>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if pagination.pages > 1 %}
+        <div class="pagination">
+            {% if pagination.has_prev %}
+                <a href="?page={{ pagination.prev_num }}" class="btn btn-secondary">Previous</a>
+            {% endif %}
+            
+            <span>Page {{ pagination.page }} of {{ pagination.pages }}</span>
+            
+            {% if pagination.has_next %}
+                <a href="?page={{ pagination.next_num }}" class="btn btn-secondary">Next</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    {% else %}
+        <p>No reviews yet. Be the first to review this book!</p>
+    {% endif %}
+</div>
+
+<style>
+.reviews-container {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.reviews-list {
+    margin-top: 2rem;
+}
+
+.review-item {
+    padding: 1.5rem;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 1rem;
+}
+
+.review-item:last-child {
+    border-bottom: none;
+}
+
+.review-header h3 {
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+}
+
+.review-meta {
+    color: #7f8c8d;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.review-content {
+    margin-bottom: 1rem;
+    line-height: 1.8;
+}
+
+.review-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+</style>
+
+<script>
+function deleteReview(reviewId) {
+    if (confirm('Are you sure you want to delete this review?')) {
+        fetch(`/reviews/${reviewId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+            location.reload();
+        })
+        .catch(error => {
+            alert('Failed to delete review');
+        });
+    }
+}
+</script>
+{% endblock %}

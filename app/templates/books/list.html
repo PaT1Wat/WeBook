@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Browse Books - WeBook{% endblock %}
+
+{% block content %}
+<div class="books-container">
+    <h1>Browse Books</h1>
+    
+    <div class="filters">
+        <a href="{{ url_for('books.list_books') }}" class="btn btn-secondary">All</a>
+        <a href="{{ url_for('books.list_books', is_manga='true') }}" class="btn btn-secondary">Manga</a>
+        <a href="{{ url_for('books.list_books', is_novel='true') }}" class="btn btn-secondary">Novels</a>
+    </div>
+
+    {% if books %}
+        <div class="books-grid">
+            {% for book in books %}
+            <div class="book-card">
+                <a href="{{ url_for('books.book_detail', book_id=book.id) }}">
+                    {% if book.thumbnail_url %}
+                        <img src="{{ book.thumbnail_url }}" alt="{{ book.title }}">
+                    {% else %}
+                        <div class="no-image">No Image</div>
+                    {% endif %}
+                    <h3>{{ book.title }}</h3>
+                    <p class="authors">
+                        {% set authors = book.authors|from_json if book.authors else [] %}
+                        {{ authors|join(', ') }}
+                    </p>
+                    <p class="rating">★ {{ "%.1f"|format(book.average_rating) }} ({{ book.ratings_count }} ratings)</p>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if pagination.pages > 1 %}
+        <div class="pagination">
+            {% if pagination.has_prev %}
+                <a href="?page={{ pagination.prev_num }}" class="btn btn-secondary">Previous</a>
+            {% endif %}
+            
+            <span>Page {{ pagination.page }} of {{ pagination.pages }}</span>
+            
+            {% if pagination.has_next %}
+                <a href="?page={{ pagination.next_num }}" class="btn btn-secondary">Next</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    {% else %}
+        <p>No books found. <a href="{{ url_for('books.search') }}">Search and import books</a> to get started!</p>
+    {% endif %}
+</div>
+{% endblock %}
