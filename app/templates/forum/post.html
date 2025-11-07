@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block title %}{{ post.title }} - Forum - WeBook{% endblock %}
+
+{% block content %}
+<div class="forum-post-container">
+    <div class="post-detail">
+        <div class="post-header">
+            {% if post.is_pinned %}
+                <span class="badge">📌 Pinned</span>
+            {% endif %}
+            {% if post.is_locked %}
+                <span class="badge">🔒 Locked</span>
+            {% endif %}
+            <h1>{{ post.title }}</h1>
+            <p class="post-meta">
+                Posted by {{ post.author.username }} • 
+                {{ post.created_at.strftime('%Y-%m-%d %H:%M') }} • 
+                Category: {{ post.category }}
+            </p>
+        </div>
+        
+        <div class="post-content">
+            <p>{{ post.content }}</p>
+        </div>
+        
+        <div class="post-stats">
+            <span>👁️ {{ post.views_count }} views</span>
+            <span>❤️ {{ post.likes_count }} likes</span>
+            <span>💬 {{ comments|length }} comments</span>
+        </div>
+        
+        {% if current_user.is_authenticated and (current_user.id == post.user_id or current_user.is_admin) %}
+        <div class="post-actions">
+            <button onclick="deletePost({{ post.id }})" class="btn btn-small">Delete Post</button>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="comments-section">
+        <h2>Comments</h2>
+        
+        {% if current_user.is_authenticated and not post.is_locked %}
+        <form id="comment-form" class="comment-form">
+            <textarea id="comment-content" placeholder="Write a comment..." required></textarea>
+            <button type="submit" class="btn btn-primary">Post Comment</button>
+        </form>
+        {% elif post.is_locked %}
+        <p><em>This post is locked. No new comments can be added.</em></p>
+        {% else %}
+        <p><a href="{{ url_for('auth.login') }}">Login</a> to comment</p>
+        {% endif %}
+        
+        <div class="comments-list">
+            {% for comment in comments %}
+            <div class="comment-item">
+                <div class="comment-header">
+                    <strong>{{ comment.author.username }}</strong>
+                    <span class="comment-time">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                </div>
+                <div class="comment-content">
+                    <p>{{ comment.content }}</p>
+                </div>
+                <div class="comment-actions">
+                    <span>❤️ {{ comment.likes_count }}</span>
+                    {% if current_user.is_authenticated and (current_user.id == comment.user_id or current_user.is_admin) %}
+                        <button onclick="deleteComment({{ comment.id }})" class="btn btn-small">Delete</button>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        {% if pagination.pages > 1 %}
+        <div class="pagination">
+            {% if pagination.has_prev %}
+                <a href="?page={{ pagination.prev_num }}" class="btn btn-secondary">Previous</a>
+            {% endif %}
+            
+            <span>Page {{ pagination.page }} of {{ pagination.pages }}</span>
+            
+            {% if pagination.has_next %}
+                <a href="?page={{ pagination.next_num }}" class="btn btn-secondary">Next</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.forum-post-container {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.post-detail {
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 2px solid #eee;
+}
+
+.post-header h1 {
+    margin-bottom: 1rem;
+}
+
+.post-meta {
+    color: #7f8c8d;
+    margin-bottom: 2rem;
+}
+
+.post-content {
+    margin-bottom: 2rem;
+    line-height: 1.8;
+    font-size: 1.1rem;
+}
+
+.post-stats {
+    display: flex;
+    gap: 2rem;
+    color: #7f8c8d;
+    margin-bottom: 1rem;
+}
+
+.comment-form {
+    margin-bottom: 2rem;
+}
+
+.comment-form textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 1rem;
+    font-family: inherit;
+}
+
+.comments-list {
+    margin-top: 2rem;
+}
+
+.comment-item {
+    padding: 1rem;
+    border-left: 3px solid #3498db;
+    background: #f9f9f9;
+    margin-bottom: 1rem;
+    border-radius: 5px;
+}
+
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.comment-time {
+    color: #7f8c8d;
+    font-size: 0.9rem;
+}
+
+.comment-content {
+    margin-bottom: 0.5rem;
+}
+
+.comment-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+</style>
+
+<script>
+document.getElementById('comment-form')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const content = document.getElementById('comment-content').value;
+    
+    fetch('/forum/posts/{{ post.id }}/comments', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ content: content })
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message);
+        location.reload();
+    })
+    .catch(error => {
+        alert('Failed to post comment');
+    });
+});
+
+function deletePost(postId) {
+    if (confirm('Are you sure you want to delete this post?')) {
+        fetch(`/forum/posts/${postId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+            window.location.href = '/forum/';
+        })
+        .catch(error => {
+            alert('Failed to delete post');
+        });
+    }
+}
+
+function deleteComment(commentId) {
+    if (confirm('Are you sure you want to delete this comment?')) {
+        fetch(`/forum/comments/${commentId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+            location.reload();
+        })
+        .catch(error => {
+            alert('Failed to delete comment');
+        });
+    }
+}
+</script>
+{% endblock %}

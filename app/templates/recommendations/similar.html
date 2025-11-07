@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Similar to {{ book.title }} - WeBook{% endblock %}
+
+{% block content %}
+<div class="similar-container">
+    <h1>Books Similar to "{{ book.title }}"</h1>
+    <a href="{{ url_for('books.book_detail', book_id=book.id) }}" class="btn btn-secondary">Back to Book</a>
+    
+    {% if similar_books %}
+        <div class="books-grid">
+            {% for similar in similar_books %}
+            <div class="book-card">
+                <a href="{{ url_for('books.book_detail', book_id=similar.id) }}">
+                    {% if similar.thumbnail_url %}
+                        <img src="{{ similar.thumbnail_url }}" alt="{{ similar.title }}">
+                    {% else %}
+                        <div class="no-image">No Image</div>
+                    {% endif %}
+                    <h3>{{ similar.title }}</h3>
+                    <p class="authors">
+                        {% set authors = similar.authors|from_json if similar.authors else [] %}
+                        {{ authors|join(', ') }}
+                    </p>
+                    <p class="rating">★ {{ "%.1f"|format(similar.average_rating) }} ({{ similar.ratings_count }})</p>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No similar books found yet. Rate this book and others to help us find similar titles!</p>
+    {% endif %}
+</div>
+{% endblock %}
