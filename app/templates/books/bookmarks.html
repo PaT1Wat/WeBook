@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}My Bookmarks - WeBook{% endblock %}
+
+{% block content %}
+<div class="bookmarks-container">
+    <h1>My Bookmarks</h1>
+    
+    {% if bookmarks %}
+        <div class="books-grid">
+            {% for bookmark in bookmarks %}
+            <div class="book-card">
+                <a href="{{ url_for('books.book_detail', book_id=bookmark.book.id) }}">
+                    {% if bookmark.book.thumbnail_url %}
+                        <img src="{{ bookmark.book.thumbnail_url }}" alt="{{ bookmark.book.title }}">
+                    {% else %}
+                        <div class="no-image">No Image</div>
+                    {% endif %}
+                    <h3>{{ bookmark.book.title }}</h3>
+                    <p class="authors">
+                        {% set authors = bookmark.book.authors|from_json if bookmark.book.authors else [] %}
+                        {{ authors|join(', ') }}
+                    </p>
+                    {% if bookmark.notes %}
+                        <p class="notes"><em>{{ bookmark.notes[:100] }}...</em></p>
+                    {% endif %}
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>You haven't bookmarked any books yet. <a href="{{ url_for('books.list_books') }}">Browse books</a> to get started!</p>
+    {% endif %}
+</div>
+{% endblock %}

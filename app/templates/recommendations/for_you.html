@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Recommendations For You - WeBook{% endblock %}
+
+{% block content %}
+<div class="recommendations-container">
+    <h1>Recommended For You</h1>
+    <p>Based on your reading history and preferences</p>
+    
+    {% if books %}
+        <div class="books-grid">
+            {% for book in books %}
+            <div class="book-card">
+                <a href="{{ url_for('books.book_detail', book_id=book.id) }}">
+                    {% if book.thumbnail_url %}
+                        <img src="{{ book.thumbnail_url }}" alt="{{ book.title }}">
+                    {% else %}
+                        <div class="no-image">No Image</div>
+                    {% endif %}
+                    <h3>{{ book.title }}</h3>
+                    <p class="authors">
+                        {% set authors = book.authors|from_json if book.authors else [] %}
+                        {{ authors|join(', ') }}
+                    </p>
+                    <p class="rating">★ {{ "%.1f"|format(book.average_rating) }} ({{ book.ratings_count }})</p>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="no-recommendations">
+            <p>Start rating books to get personalized recommendations!</p>
+            <a href="{{ url_for('books.list_books') }}" class="btn btn-primary">Browse Books</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

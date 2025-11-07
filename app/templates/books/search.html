@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Search Books - WeBook{% endblock %}
+
+{% block content %}
+<div class="search-container">
+    <h1>Search Books</h1>
+    <form method="GET" class="search-form">
+        <div class="form-group">
+            <input type="text" name="q" value="{{ query }}" placeholder="Search for manga or novels..." required>
+            <select name="source">
+                <option value="google">Google Books</option>
+                <option value="openlibrary">Open Library</option>
+            </select>
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+    </form>
+
+    {% if books %}
+        <div class="search-results">
+            <h2>Search Results for "{{ query }}"</h2>
+            <div class="books-grid">
+                {% for book in books %}
+                <div class="book-card">
+                    {% if book.thumbnail_url %}
+                        <img src="{{ book.thumbnail_url }}" alt="{{ book.title }}">
+                    {% else %}
+                        <div class="no-image">No Image</div>
+                    {% endif %}
+                    <h3>{{ book.title }}</h3>
+                    <p class="authors">
+                        {% if book.authors %}
+                            {{ book.authors|join(', ') if book.authors is iterable and book.authors is not string else book.authors }}
+                        {% endif %}
+                    </p>
+                    <form method="POST" action="{{ url_for('books.import_book') }}" class="import-form">
+                        <input type="hidden" name="book_id" value="{{ book.google_books_id or book.open_library_id }}">
+                        <input type="hidden" name="source" value="{{ 'google' if book.google_books_id else 'openlibrary' }}">
+                        <button type="submit" class="btn btn-small">Import Book</button>
+                    </form>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% elif query %}
+        <p>No results found for "{{ query }}"</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}WeBook - Manga & Novel Community{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">WeBook</a>
+            <ul class="nav-menu">
+                <li><a href="{{ url_for('books.index') }}">Home</a></li>
+                <li><a href="{{ url_for('books.search') }}">Search</a></li>
+                <li><a href="{{ url_for('books.list_books') }}">Browse</a></li>
+                <li><a href="{{ url_for('recommendations.get_popular') }}">Popular</a></li>
+                <li><a href="{{ url_for('forum.index') }}">Forum</a></li>
+                <li><a href="{{ url_for('chat.index') }}">Chat</a></li>
+                {% if current_user.is_authenticated %}
+                    <li><a href="{{ url_for('recommendations.get_recommendations') }}">For You</a></li>
+                    <li><a href="{{ url_for('books.my_bookmarks') }}">Bookmarks</a></li>
+                    {% if current_user.is_admin %}
+                        <li><a href="{{ url_for('admin.dashboard') }}">Admin</a></li>
+                    {% endif %}
+                    <li><a href="{{ url_for('auth.profile') }}">{{ current_user.username }}</a></li>
+                    <li><a href="{{ url_for('auth.logout') }}">Logout</a></li>
+                {% else %}
+                    <li><a href="{{ url_for('auth.login') }}">Login</a></li>
+                    <li><a href="{{ url_for('auth.register') }}">Register</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 WeBook - Manga & Novel Community. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

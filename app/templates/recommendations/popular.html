@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Popular Books - WeBook{% endblock %}
+
+{% block content %}
+<div class="popular-container">
+    <h1>Popular Books</h1>
+    
+    <div class="category-filters">
+        <a href="{{ url_for('recommendations.get_popular') }}" class="btn btn-secondary">All</a>
+        <a href="{{ url_for('recommendations.get_popular', category='manga') }}" class="btn btn-secondary">Manga</a>
+        <a href="{{ url_for('recommendations.get_popular', category='novel') }}" class="btn btn-secondary">Novels</a>
+    </div>
+    
+    {% if books %}
+        <div class="books-grid">
+            {% for book in books %}
+            <div class="book-card">
+                <a href="{{ url_for('books.book_detail', book_id=book.id) }}">
+                    {% if book.thumbnail_url %}
+                        <img src="{{ book.thumbnail_url }}" alt="{{ book.title }}">
+                    {% else %}
+                        <div class="no-image">No Image</div>
+                    {% endif %}
+                    <h3>{{ book.title }}</h3>
+                    <p class="authors">
+                        {% set authors = book.authors|from_json if book.authors else [] %}
+                        {{ authors|join(', ') }}
+                    </p>
+                    <p class="rating">★ {{ "%.1f"|format(book.average_rating) }} ({{ book.ratings_count }} ratings)</p>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No books available yet.</p>
+    {% endif %}
+</div>
+
+<style>
+.category-filters {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+</style>
+{% endblock %}
