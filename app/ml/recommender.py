@@ -80,7 +80,8 @@ class HybridRecommender:
             # Train KNN model for collaborative filtering
             if len(self.ratings_matrix) > 0:
                 sparse_matrix = csr_matrix(self.ratings_matrix.values)
-                self.knn_model = NearestNeighbors(metric='cosine', algorithm='brute', n_neighbors=min(10, len(self.ratings_matrix)))
+                # Use 'auto' to let sklearn choose optimal algorithm for better performance
+                self.knn_model = NearestNeighbors(metric='cosine', algorithm='auto', n_neighbors=min(10, len(self.ratings_matrix)))
                 self.knn_model.fit(sparse_matrix)
     
     def get_content_based_recommendations(self, book_id, top_n=10):

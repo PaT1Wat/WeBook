@@ -87,7 +87,8 @@ def get_post(post_id):
     """Get a forum post with comments"""
     post = ForumPost.query.get_or_404(post_id)
     
-    # Increment view count
+    # Increment view count (consider caching for high-traffic scenarios)
+    # In production, batch these updates or use a caching mechanism
     post.views_count += 1
     db.session.commit()
     

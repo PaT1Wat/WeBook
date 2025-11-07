@@ -22,6 +22,21 @@ def register():
             flash('All fields are required', 'error')
             return redirect(url_for('auth.register'))
         
+        # Password strength validation
+        if len(password) < 8:
+            if request.is_json:
+                return jsonify({'error': 'Password must be at least 8 characters long'}), 400
+            flash('Password must be at least 8 characters long', 'error')
+            return redirect(url_for('auth.register'))
+        
+        # Username validation (alphanumeric and underscore only)
+        import re
+        if not re.match(r'^[a-zA-Z0-9_]{3,20}$', username):
+            if request.is_json:
+                return jsonify({'error': 'Username must be 3-20 characters long and contain only letters, numbers, and underscores'}), 400
+            flash('Username must be 3-20 characters long and contain only letters, numbers, and underscores', 'error')
+            return redirect(url_for('auth.register'))
+        
         # Check if user already exists
         if User.query.filter_by(username=username).first():
             if request.is_json:

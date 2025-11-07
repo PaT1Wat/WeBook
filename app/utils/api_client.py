@@ -1,6 +1,9 @@
 import requests
 import os
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 class GoogleBooksAPI:
     """Client for Google Books API"""
@@ -24,7 +27,7 @@ class GoogleBooksAPI:
             response.raise_for_status()
             return response.json()
         except requests.RequestException as e:
-            print(f"Error fetching from Google Books API: {e}")
+            logger.error(f"Error fetching from Google Books API: {e}")
             return {'items': []}
     
     def get_book(self, volume_id):
@@ -38,7 +41,7 @@ class GoogleBooksAPI:
             response.raise_for_status()
             return response.json()
         except requests.RequestException as e:
-            print(f"Error fetching book from Google Books API: {e}")
+            logger.error(f"Error fetching book from Google Books API: {e}")
             return None
     
     @staticmethod
@@ -82,7 +85,7 @@ class OpenLibraryAPI:
             response.raise_for_status()
             return response.json()
         except requests.RequestException as e:
-            print(f"Error fetching from Open Library API: {e}")
+            logger.error(f"Error fetching from Open Library API: {e}")
             return {'docs': []}
     
     def get_book(self, book_id):
@@ -92,7 +95,7 @@ class OpenLibraryAPI:
             response.raise_for_status()
             return response.json()
         except requests.RequestException as e:
-            print(f"Error fetching book from Open Library API: {e}")
+            logger.error(f"Error fetching book from Open Library API: {e}")
             return None
     
     @staticmethod

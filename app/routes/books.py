@@ -133,9 +133,14 @@ def import_book():
             return jsonify({'error': 'Book data incomplete'}), 404
     
     # Determine if it's manga or novel based on categories
+    # Book categorization keywords
+    MANGA_KEYWORDS = ['manga', 'comic', 'graphic novel', 'manhwa', 'manhua']
+    NOVEL_KEYWORDS = ['novel', 'fiction', 'literature', 'story', 'tale']
+    
     categories = json.loads(book_data.get('categories', '[]'))
-    is_manga = any('manga' in cat.lower() or 'comic' in cat.lower() for cat in categories)
-    is_novel = any('novel' in cat.lower() or 'fiction' in cat.lower() for cat in categories)
+    categories_lower = [cat.lower() for cat in categories]
+    is_manga = any(keyword in cat for cat in categories_lower for keyword in MANGA_KEYWORDS)
+    is_novel = any(keyword in cat for cat in categories_lower for keyword in NOVEL_KEYWORDS)
     
     # Create new book
     book = Book(
